@@ -1,0 +1,9 @@
+{
+    "qubits": 2,
+    "gates": [
+        {"type": "H", "qubits": [0]},
+        {"type": "CX", "qubits": [0, 1]},
+        {"type": "MEASURE", "qubits": [0, 0]},
+        {"type": "MEASURE", "qubits": [1, 1]}
+    ]
+}

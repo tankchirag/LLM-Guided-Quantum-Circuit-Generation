@@ -2,6 +2,6 @@
 
 SUPPORTED_GATES = {
     "H", "X", "Y", "Z",
-    "CNOT",
+    "CNOT", "CX",
     "RX", "RY", "RZ"
 }

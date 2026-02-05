@@ -1,0 +1,7 @@
+{
+  "num_qubits": 2,
+  "gates": [
+    {"name": "H", "targets": [0]},
+    {"name": "CX", "controls": [0], "targets": [1]}
+  ]
+}

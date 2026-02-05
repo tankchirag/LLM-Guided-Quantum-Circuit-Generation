@@ -1,3 +1,5 @@
 qiskit
 numpy
 matplotlib
+transformers
+torch

@@ -1,7 +1,4 @@
 # src/llm.py
-"""
-Local LLM interface with robust JSON extraction.
-"""
 
 from transformers import pipeline
 import json
@@ -11,40 +8,35 @@ MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 generator = pipeline(
     "text-generation",
     model=MODEL_NAME,
-    device=-1  # CPU
+    device=-1
 )
 
 
 def _extract_first_json(text: str) -> dict:
-    """
-    Extracts the FIRST valid JSON object from a string.
-    """
     start = text.find("{")
     if start == -1:
-        raise ValueError("No JSON object found in LLM output")
+        raise ValueError("No JSON found")
 
-    brace_count = 0
+    depth = 0
     for i in range(start, len(text)):
         if text[i] == "{":
-            brace_count += 1
+            depth += 1
         elif text[i] == "}":
-            brace_count -= 1
-            if brace_count == 0:
-                json_str = text[start:i + 1]
-                return json.loads(json_str)
+            depth -= 1
+            if depth == 0:
+                return json.loads(text[start:i + 1])
 
-    raise ValueError("Incomplete JSON object")
+    raise ValueError("Incomplete JSON")
 
 
-def generate_task_from_prompt(prompt: str) -> dict:
+def generate_task(prompt: str, feedback: str | None = None) -> dict:
     system_prompt = f"""
-You are a quantum compiler assistant.
+You are a quantum circuit planner.
 
 Return ONLY valid JSON.
 No explanations.
-No markdown.
 
-JSON schema:
+Schema:
 {{
   "num_qubits": 2,
   "gates": [
@@ -58,16 +50,13 @@ Task:
 {prompt}
 """
 
+    if feedback:
+        system_prompt += f"\nFeedback:\n{feedback}\nRevise the circuit."
+
     output = generator(
         system_prompt,
         max_new_tokens=256,
         do_sample=False
     )[0]["generated_text"]
 
-    try:
-        task = _extract_first_json(output)
-    except Exception as e:
-        print("RAW LLM OUTPUT:\n", output)
-        raise ValueError("Failed to extract valid JSON from LLM") from e
-
-    return task
+    return _extract_first_json(output)

@@ -25,7 +25,6 @@ def build_circuit(task: dict) -> QuantumCircuit:
             qc.cx(gate["controls"][0], gate["targets"][0])
 
         elif t == "MEASURE":
-            # map qubit → same classical bit index
             for q in gate["targets"]:
                 qc.measure(q, q)
 

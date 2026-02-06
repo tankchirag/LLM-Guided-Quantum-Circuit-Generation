@@ -1,56 +1,73 @@
-import json
-import os
-import re
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
+# src/llm.py
+"""
+Local LLM interface with robust JSON extraction.
+"""
 
+from transformers import pipeline
+import json
 
 MODEL_NAME = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 
+generator = pipeline(
+    "text-generation",
+    model=MODEL_NAME,
+    device=-1  # CPU
+)
+
+
+def _extract_first_json(text: str) -> dict:
+    """
+    Extracts the FIRST valid JSON object from a string.
+    """
+    start = text.find("{")
+    if start == -1:
+        raise ValueError("No JSON object found in LLM output")
+
+    brace_count = 0
+    for i in range(start, len(text)):
+        if text[i] == "{":
+            brace_count += 1
+        elif text[i] == "}":
+            brace_count -= 1
+            if brace_count == 0:
+                json_str = text[start:i + 1]
+                return json.loads(json_str)
+
+    raise ValueError("Incomplete JSON object")
+
 
 def generate_task_from_prompt(prompt: str) -> dict:
-    """
-    Uses a local open-source LLM to generate a quantum circuit task in JSON.
-    """
+    system_prompt = f"""
+You are a quantum compiler assistant.
 
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL_NAME,
-        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-        device_map="auto"
-    )
+Return ONLY valid JSON.
+No explanations.
+No markdown.
 
-    system_prompt = (
-        "You are a quantum compiler assistant.\n"
-        "Return ONLY valid JSON.\n"
-        "Schema:\n"
-        "{\n"
-        '  "num_qubits": int,\n'
-        '  "gates": [\n'
-        '    {"type": "H", "targets": [int]},\n'
-        '    {"type": "CX", "controls": [int], "targets": [int]},\n'
-        '    {"type": "MEASURE", "targets": [int]}\n'
-        "  ]\n"
-        "}\n"
-    )
+JSON schema:
+{{
+  "num_qubits": 2,
+  "gates": [
+    {{"type": "H", "targets": [0]}},
+    {{"type": "CX", "controls": [0], "targets": [1]}},
+    {{"type": "MEASURE", "targets": [0,1]}}
+  ]
+}}
 
-    full_prompt = system_prompt + "\nUser request:\n" + prompt
+Task:
+{prompt}
+"""
 
-    inputs = tokenizer(full_prompt, return_tensors="pt").to(model.device)
-
-    outputs = model.generate(
-        **inputs,
+    output = generator(
+        system_prompt,
         max_new_tokens=256,
-        do_sample=True
-    )
-
-    text = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-    match = re.search(r"\{[\s\S]*\}", text)
-    if not match:
-        raise ValueError("LLM did not return JSON")
+        do_sample=False
+    )[0]["generated_text"]
 
     try:
-        return json.loads(match.group())
-    except json.JSONDecodeError as e:
-        raise ValueError("Failed to parse LLM JSON output") from e
+        task = _extract_first_json(output)
+    except Exception as e:
+        print("RAW LLM OUTPUT:\n", output)
+        raise ValueError("Failed to extract valid JSON from LLM") from e
+
+    return task

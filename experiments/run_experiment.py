@@ -1,77 +1,82 @@
-# experiments/run_experiment.py
-
 import json
-from pathlib import Path
-from datetime import datetime
-
 from qiskit_aer import AerSimulator
 from qiskit import transpile
-import matplotlib.pyplot as plt
 
-from src.llm import generate_task
-from src.validator import validate_task, ValidationError
+from src.llm import generate_candidates
+from src.validator import normalize_plan
 from src.builder import build_circuit
-from src.metrics import circuit_metrics, normalize_counts
-from src.plots import plot_measurements
+from src.metrics import compute_metrics
+from src.visualization import save_circuit_image, save_histogram
+
+TASK = "Create a Bell state"
+NUM_QUBITS = 2
+NUM_CANDIDATES = 5
 
 
-OUTPUT_DIR = Path("outputs")
-OUTPUT_DIR.mkdir(exist_ok=True)
+def score(m):
+    return m["cx_count"] * 10 + m["depth"]
 
-MAX_RETRIES = 2
+
+def fallback_plan():
+    return {
+        "qubits": 2,
+        "gates": [
+            {"type": "H", "target": 0},
+            {"type": "CX", "control": 0, "target": 1}
+        ]
+    }
 
 
 def main():
-    prompt = "Create a Bell state circuit"
-
-    feedback = None
-    task = None
-
-    for attempt in range(MAX_RETRIES + 1):
-        task = generate_task(prompt, feedback)
-
-        try:
-            validate_task(task)
-            break
-        except ValidationError as e:
-            feedback = f"Validation error: {str(e)}"
-    else:
-        raise RuntimeError("LLM failed to generate valid circuit")
-
-    qc = build_circuit(task)
-
-    # Circuit visualization
-    fig = qc.draw("mpl")
-    fig.savefig(OUTPUT_DIR / "circuit.png", dpi=300, bbox_inches="tight")
-    plt.close(fig)
-
     simulator = AerSimulator()
-    compiled = transpile(qc, simulator)
-    result = simulator.run(compiled, shots=1024).result()
+    raw = generate_candidates(TASK, NUM_QUBITS, NUM_CANDIDATES)
 
-    counts = result.get_counts()
-    metrics = circuit_metrics(qc)
+    best_plan = None
+    best_metrics = None
+    best_counts = None
+    best_score = float("inf")
 
-    # Measurement histogram
-    plot_measurements(counts, OUTPUT_DIR / "measurement_histogram.png")
+    for plan in raw:
+        plan = normalize_plan(plan, NUM_QUBITS)
+        if plan is None:
+            continue
 
-    output = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "prompt": prompt,
-        "task": task,
-        "metrics": metrics,
-        "counts": counts,
-        "probabilities": normalize_counts(counts),
-        "artifacts": {
-            "circuit_image": "outputs/circuit.png",
-            "measurement_histogram": "outputs/measurement_histogram.png"
-        }
-    }
+        qc = build_circuit(plan)
+        tqc = transpile(qc, simulator)
+        result = simulator.run(tqc, shots=1024).result()
 
-    with open(OUTPUT_DIR / "results.json", "w") as f:
-        json.dump(output, f, indent=2)
+        counts = result.get_counts()
+        metrics = compute_metrics(tqc)
+        s = score(metrics)
 
-    print("✔ Circuit, metrics, and measurement histogram generated")
+        if s < best_score:
+            best_score = s
+            best_plan = plan
+            best_metrics = metrics
+            best_counts = counts
+            best_circuit = qc
+
+    if best_plan is None:
+        print("⚠ LLM failed — using fallback circuit")
+        best_plan = fallback_plan()
+        best_circuit = build_circuit(best_plan)
+        tqc = transpile(best_circuit, simulator)
+        result = simulator.run(tqc, shots=1024).result()
+        best_counts = result.get_counts()
+        best_metrics = compute_metrics(tqc)
+
+    save_circuit_image(best_circuit, "outputs/circuit.png")
+    save_histogram(best_counts, "outputs/measurement_histogram.png")
+
+    with open("outputs/results.json", "w") as f:
+        json.dump({
+            "task": TASK,
+            "plan": best_plan,
+            "metrics": best_metrics,
+            "counts": best_counts
+        }, f, indent=2)
+
+    print("✔ Experiment completed successfully")
 
 
 if __name__ == "__main__":

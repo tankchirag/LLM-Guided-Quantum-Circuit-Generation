@@ -1,13 +1,6 @@
-# src/metrics.py
-
-def circuit_metrics(qc):
+def compute_metrics(qc):
     return {
         "depth": qc.depth(),
-        "gate_count": qc.size(),
-        "cx_count": qc.count_ops().get("cx", 0)
+        "gate_count": len(qc.data),
+        "cx_count": sum(1 for g in qc.data if g.operation.name == "cx")
     }
-
-
-def normalize_counts(counts):
-    total = sum(counts.values())
-    return {k: v / total for k, v in counts.items()}

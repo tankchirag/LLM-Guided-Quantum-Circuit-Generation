@@ -1,32 +1,14 @@
-# src/builder.py
-
 from qiskit import QuantumCircuit
 
 
-def build_circuit(task: dict) -> QuantumCircuit:
-    qc = QuantumCircuit(task["num_qubits"], task["num_qubits"])
+def build_circuit(plan: dict) -> QuantumCircuit:
+    qc = QuantumCircuit(plan["qubits"], plan["qubits"])
 
-    for gate in task["gates"]:
-        t = gate["type"]
+    for g in plan["gates"]:
+        if g["type"] == "H":
+            qc.h(g["target"])
+        elif g["type"] == "CX":
+            qc.cx(g["control"], g["target"])
 
-        if t == "H":
-            qc.h(gate["targets"][0])
-
-        elif t == "X":
-            qc.x(gate["targets"][0])
-
-        elif t == "Y":
-            qc.y(gate["targets"][0])
-
-        elif t == "Z":
-            qc.z(gate["targets"][0])
-
-        elif t == "CX":
-            qc.cx(gate["controls"][0], gate["targets"][0])
-
-        elif t == "MEASURE":
-            # map qubit → same classical bit index
-            for q in gate["targets"]:
-                qc.measure(q, q)
-
+    qc.measure(range(plan["qubits"]), range(plan["qubits"]))
     return qc

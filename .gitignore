@@ -20,4 +20,4 @@ Thumbs.db
 *.env
 
 # Outputs
-outputs/
+#outputs/

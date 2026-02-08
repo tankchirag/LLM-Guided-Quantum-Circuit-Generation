@@ -1,0 +1,252 @@
+{
+  "task": "Create a Bell state",
+  "best_index": 1,
+  "candidates": [
+    {
+      "plan": {
+        "qubits": 2,
+        "gates": [
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 1
+          },
+          {
+            "type": "CX",
+            "control": 1,
+            "target": 0
+          },
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 1
+          },
+          {
+            "type": "CX",
+            "control": 1,
+            "target": 0
+          }
+        ]
+      },
+      "metrics": {
+        "depth": 7,
+        "gate_count": 8,
+        "cx_count": 4
+      },
+      "counts": {
+        "01": 268,
+        "11": 257,
+        "00": 264,
+        "10": 235
+      },
+      "score": 47,
+      "circuit_image": "candidate_0_circuit.png",
+      "histogram_image": "candidate_0_histogram.png"
+    },
+    {
+      "plan": {
+        "qubits": 2,
+        "gates": [
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          }
+        ]
+      },
+      "metrics": {
+        "depth": 1,
+        "gate_count": 2,
+        "cx_count": 0
+      },
+      "counts": {
+        "00": 1024
+      },
+      "score": 1,
+      "circuit_image": "candidate_1_circuit.png",
+      "histogram_image": "candidate_1_histogram.png"
+    },
+    {
+      "plan": {
+        "qubits": 2,
+        "gates": [
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 1
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          }
+        ]
+      },
+      "metrics": {
+        "depth": 4,
+        "gate_count": 5,
+        "cx_count": 2
+      },
+      "counts": {
+        "00": 488,
+        "10": 536
+      },
+      "score": 24,
+      "circuit_image": "candidate_2_circuit.png",
+      "histogram_image": "candidate_2_histogram.png"
+    },
+    {
+      "plan": {
+        "qubits": 2,
+        "gates": [
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 0
+          }
+        ]
+      },
+      "metrics": {
+        "depth": 1,
+        "gate_count": 2,
+        "cx_count": 0
+      },
+      "counts": {
+        "00": 1024
+      },
+      "score": 1,
+      "circuit_image": "candidate_3_circuit.png",
+      "histogram_image": "candidate_3_histogram.png"
+    },
+    {
+      "plan": {
+        "qubits": 2,
+        "gates": [
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 1
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 0
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 1
+          },
+          {
+            "type": "CX",
+            "control": 0,
+            "target": 1
+          },
+          {
+            "type": "H",
+            "target": 0
+          }
+        ]
+      },
+      "metrics": {
+        "depth": 1,
+        "gate_count": 2,
+        "cx_count": 0
+      },
+      "counts": {
+        "00": 1024
+      },
+      "score": 1,
+      "circuit_image": "candidate_4_circuit.png",
+      "histogram_image": "candidate_4_histogram.png"
+    }
+  ]
+}

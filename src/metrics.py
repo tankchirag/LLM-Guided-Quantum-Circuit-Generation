@@ -1,6 +1,7 @@
+# metrics.py (example)
 def compute_metrics(qc):
     return {
         "depth": qc.depth(),
-        "gate_count": len(qc.data),
-        "cx_count": sum(1 for g in qc.data if g.operation.name == "cx")
+        "gate_count": qc.size(),
+        "cx_count": qc.count_ops().get("cx", 0)
     }

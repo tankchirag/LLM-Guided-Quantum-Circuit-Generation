@@ -1,9 +1,0 @@
-{
-  "task": "GHZ",
-  "num_qubits": 3,
-  "gates": [
-    { "type": "H", "target": 0 },
-    { "type": "CNOT", "control": 0, "target": 1 },
-    { "type": "CNOT", "control": 1, "target": 2 }
-  ]
-}

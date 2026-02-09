@@ -161,7 +161,7 @@ LLM-Guided-Quantum-Circuit-Generation/
   ]
 }
 
-⚡ Next Steps (Phase 2.8+)
+##⚡ Next Steps (Phase 2.8+)##
 
 Noise-aware simulation: Use realistic hardware noise models
 
@@ -169,7 +169,7 @@ Constraint-guided decoding: Enforce qubit connectivity & depth limits
 
 RL optimization & QASM export: Research-grade agentic quantum compilation
 
-📌 Notes
+##📌 Notes##
 
 Designed for research-grade reproducibility
 
@@ -179,7 +179,7 @@ Fully modular for future integration with real quantum backends
 
 Compatible with Windows / Linux / macOS
 
-🛠️ How to Run
+##🛠️ How to Run##
 
 # Create virtual environment
 python -m venv venv
